@@ -1,0 +1,491 @@
+@model IEnumerable<QLSupermarket.Models.Order>
+
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+
+    var orders = Model?.ToList()
+        ?? new List<QLSupermarket.Models.Order>();
+
+    int totalOrders = orders.Count;
+
+    decimal totalRevenue = orders.Sum(o =>
+        Convert.ToDecimal(o.TotalAmount));
+
+    int pendingOrders = orders.Count(o =>
+        (o.Status ?? "").Trim().ToLower() == "pending" ||
+        (o.Status ?? "").Trim().ToLower() == "chờ xử lý");
+
+    int completedOrders = orders.Count(o =>
+        (o.Status ?? "").Trim().ToLower() == "completed" ||
+        (o.Status ?? "").Trim().ToLower() == "hoàn thành");
+}
+
+<link rel="stylesheet"
+      href="~/css/orders-index.css"
+      asp-append-version="true" />
+
+<div class="orders-page">
+
+    <!-- HEADER -->
+    <div class="orders-header">
+        <div>
+            <div class="orders-eyebrow">
+                QUẢN LÝ BÁN HÀNG
+            </div>
+
+            <h2>Quản lý đơn hàng</h2>
+
+            <p>
+                Theo dõi, tìm kiếm và quản lý các đơn hàng
+                trong hệ thống siêu thị.
+            </p>
+        </div>
+
+        <a asp-action="Create"
+           class="btn-add-order">
+            <i class="bi bi-plus-lg"></i>
+            Thêm đơn hàng
+        </a>
+    </div>
+
+    <!-- THÔNG BÁO THÀNH CÔNG -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    <!-- THÔNG BÁO LỖI -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    <!-- THỐNG KÊ -->
+    <div class="row g-3 mb-4">
+
+        <!-- TỔNG ĐƠN HÀNG -->
+        <div class="col-lg-3 col-md-6">
+            <div class="order-stat-card">
+                <div class="stat-icon blue">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div class="stat-info">
+                    <span>Tổng đơn hàng</span>
+                    <h3>@totalOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHỜ XỬ LÝ -->
+        <div class="col-lg-3 col-md-6">
+            <div class="order-stat-card">
+                <div class="stat-icon orange">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div class="stat-info">
+                    <span>Chờ xử lý</span>
+                    <h3>@pendingOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOÀN THÀNH -->
+        <div class="col-lg-3 col-md-6">
+            <div class="order-stat-card">
+                <div class="stat-icon green">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <div class="stat-info">
+                    <span>Hoàn thành</span>
+                    <h3>@completedOrders</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- TỔNG GIÁ TRỊ -->
+        <div class="col-lg-3 col-md-6">
+            <div class="order-stat-card">
+                <div class="stat-icon purple">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+
+                <div class="stat-info">
+                    <span>Tổng giá trị đơn hàng</span>
+                    <h3 class="revenue-value">
+                        @totalRevenue.ToString("N0") đ
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DANH SÁCH ĐƠN HÀNG -->
+    <div class="orders-card">
+
+        <!-- HEADER DANH SÁCH -->
+        <div class="orders-card-header">
+            <div>
+                <h5>Danh sách đơn hàng</h5>
+                <p>Thông tin và trạng thái các đơn hàng</p>
+            </div>
+
+            <span class="total-badge">
+                @totalOrders đơn hàng
+            </span>
+        </div>
+
+        <!-- TÌM KIẾM VÀ LỌC -->
+        <div class="orders-toolbar">
+
+            <div class="order-search">
+                <i class="bi bi-search"></i>
+
+                <input type="text"
+                       id="orderSearch"
+                       placeholder="Tìm mã đơn hàng, mã người dùng, địa chỉ..."
+                       autocomplete="off" />
+            </div>
+
+            <select id="statusFilter"
+                    class="form-select status-filter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ xử lý</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+                <option value="unknown">Khác</option>
+            </select>
+
+        </div>
+
+        <!-- BẢNG ĐƠN HÀNG -->
+        <div class="table-responsive">
+
+            <table class="table orders-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>MÃ ĐƠN HÀNG</th>
+                        <th>KHÁCH HÀNG</th>
+                        <th>NGÀY ĐẶT</th>
+                        <th>TỔNG TIỀN</th>
+                        <th>TRẠNG THÁI</th>
+                        <th>ĐỊA CHỈ GIAO HÀNG</th>
+                        <th class="text-end">THAO TÁC</th>
+                    </tr>
+                </thead>
+
+                <tbody id="ordersTableBody">
+
+                    @if (!orders.Any())
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="empty-state">
+                                <i class="bi bi-inbox"></i>
+
+                                <h6>Chưa có đơn hàng</h6>
+
+                                <p>
+                                    Nhấn "Thêm đơn hàng" để bắt đầu.
+                                </p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in orders)
+                        {
+                            string status = (item.Status ?? "")
+                                .Trim()
+                                .ToLowerInvariant();
+
+                            string statusClass = status switch
+                            {
+                                "pending" or "chờ xử lý" => "pending",
+                                "processing" or "đang xử lý" => "processing",
+                                "completed" or "hoàn thành" => "completed",
+                                "cancelled" or "canceled" or "đã hủy" => "cancelled",
+                                _ => "unknown"
+                            };
+
+                            string statusText = statusClass switch
+                            {
+                                "pending" => "Chờ xử lý",
+                                "processing" => "Đang xử lý",
+                                "completed" => "Hoàn thành",
+                                "cancelled" => "Đã hủy",
+                                _ => item.Status ?? "Chưa xác định"
+                            };
+
+                            string orderDateText =
+                                item.OrderDate == null
+                                    ? "Chưa có ngày"
+                                    : $"{item.OrderDate:dd/MM/yyyy}";
+
+                            string orderTimeText =
+                                item.OrderDate == null
+                                    ? "--:--"
+                                    : $"{item.OrderDate:HH:mm}";
+
+                            decimal orderTotal =
+                                Convert.ToDecimal(item.TotalAmount);
+
+                            <tr class="order-row"
+                                data-status="@statusClass"
+                                data-search="@($"{item.OrderId} {item.UserId} {item.ShippingAddress}")">
+
+                                <!-- MÃ ĐƠN HÀNG -->
+                                <td>
+                                    <span class="order-id">
+                                        #@item.OrderId
+                                    </span>
+                                </td>
+
+                                <!-- KHÁCH HÀNG -->
+                                <td>
+                                    <div class="customer-cell">
+
+                                        <span class="customer-avatar">
+                                            <i class="bi bi-person"></i>
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                Khách hàng #@item.UserId
+                                            </strong>
+
+                                            <small>
+                                                User ID: @item.UserId
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <!-- NGÀY ĐẶT -->
+                                <td>
+                                    <div class="date-cell">
+                                        <i class="bi bi-calendar3"></i>
+                                        @orderDateText
+                                    </div>
+
+                                    <small class="order-time">
+                                        @orderTimeText
+                                    </small>
+                                </td>
+
+                                <!-- TỔNG TIỀN -->
+                                <td>
+                                    <span class="order-total">
+                                        @orderTotal.ToString("N0") đ
+                                    </span>
+                                </td>
+
+                                <!-- TRẠNG THÁI -->
+                                <td>
+                                    <span class="order-status @statusClass">
+                                        <span class="status-dot"></span>
+                                        @statusText
+                                    </span>
+                                </td>
+
+                                <!-- ĐỊA CHỈ -->
+                                <td>
+                                    <div class="address-cell"
+                                         title="@item.ShippingAddress">
+
+                                        <i class="bi bi-geo-alt"></i>
+
+                                        <span>
+                                            @(string.IsNullOrWhiteSpace(item.ShippingAddress)
+                                                ? "Chưa có địa chỉ"
+                                                : item.ShippingAddress)
+                                        </span>
+
+                                    </div>
+                                </td>
+
+                                <!-- THAO TÁC -->
+                                <td>
+                                    <div class="order-actions">
+
+                                        <!-- XEM -->
+                                        <a asp-action="Details"
+                                           asp-route-orderid="@item.OrderId"
+                                           class="action-btn view-btn"
+                                           title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <!-- SỬA -->
+                                        <a asp-action="Edit"
+                                           asp-route-orderid="@item.OrderId"
+                                           class="action-btn edit-btn"
+                                           title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- XÓA -->
+                                        <a asp-action="Delete"
+                                           asp-route-orderid="@item.OrderId"
+                                           class="action-btn delete-btn"
+                                           title="Xóa đơn hàng">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                    <!-- KHÔNG CÓ KẾT QUẢ -->
+                    <tr id="noOrderResults"
+                        style="display:none;">
+
+                        <td colspan="7"
+                            class="empty-state">
+
+                            <i class="bi bi-search"></i>
+
+                            <h6>Không tìm thấy đơn hàng</h6>
+
+                            <p>
+                                Thử thay đổi từ khóa hoặc trạng thái.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="orders-footer">
+            <span>
+                Hiển thị
+                <strong id="visibleOrderCount">
+                    @totalOrders
+                </strong>
+                trên tổng số
+                <strong>@totalOrders</strong>
+                đơn hàng
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput =
+                document.getElementById("orderSearch");
+
+            const statusFilter =
+                document.getElementById("statusFilter");
+
+            const rows =
+                document.querySelectorAll(".order-row");
+
+            const visibleCount =
+                document.getElementById("visibleOrderCount");
+
+            const emptyRow =
+                document.getElementById("noOrderResults");
+
+            if (!searchInput || !statusFilter) {
+                return;
+            }
+
+            function filterOrders() {
+
+                const keyword = searchInput.value
+                    .toLocaleLowerCase("vi")
+                    .trim();
+
+                const selectedStatus = statusFilter.value;
+
+                let count = 0;
+
+                rows.forEach(row => {
+
+                    const searchText =
+                        (row.dataset.search || "")
+                            .toLocaleLowerCase("vi");
+
+                    const rowStatus =
+                        row.dataset.status || "";
+
+                    const matchSearch =
+                        searchText.includes(keyword);
+
+                    const matchStatus =
+                        !selectedStatus ||
+                        rowStatus === selectedStatus;
+
+                    const visible =
+                        matchSearch && matchStatus;
+
+                    row.style.display =
+                        visible ? "" : "none";
+
+                    if (visible) {
+                        count++;
+                    }
+                });
+
+                if (visibleCount) {
+                    visibleCount.textContent = count;
+                }
+
+                if (emptyRow) {
+                    emptyRow.style.display =
+                        rows.length > 0 && count === 0
+                            ? ""
+                            : "none";
+                }
+            }
+
+            searchInput.addEventListener(
+                "input",
+                filterOrders
+            );
+
+            statusFilter.addEventListener(
+                "change",
+                filterOrders
+            );
+
+        });
+    </script>
+}

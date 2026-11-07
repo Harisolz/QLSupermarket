@@ -1,0 +1,227 @@
+﻿@model IEnumerable<QLSupermarket.Models.Product>
+
+@{
+    string searchString = ViewBag.SearchString as string ?? "";
+    int? categoryId = ViewBag.CategoryId;
+    decimal? minPrice = ViewBag.MinPrice;
+    decimal? maxPrice = ViewBag.MaxPrice;
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 0;
+    int totalItems = ViewBag.TotalItems ?? 0;
+    int pageSize = ViewBag.PageSize ?? 5;
+
+    int startItem = totalItems == 0
+        ? 0 : (currentPage - 1) * pageSize + 1;
+
+    int endItem = Math.Min(currentPage * pageSize, totalItems);
+}
+
+<div class="products-card list-card">
+
+    <!-- HEADER -->
+    <div class="list-header">
+        <div>
+            <h5>Danh sách sản phẩm</h5>
+            <p>Hiện có @totalItems sản phẩm phù hợp</p>
+        </div>
+
+        <span class="total-badge">
+            @totalItems sản phẩm
+        </span>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table products-table align-middle mb-0">
+
+            <thead>
+                <tr>
+                    <th>SẢN PHẨM</th>
+                    <th>DANH MỤC</th>
+                    <th>GIÁ BÁN</th>
+                    <th>TỒN KHO</th>
+                    <th class="text-end">THAO TÁC</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h6>Không tìm thấy sản phẩm</h6>
+                            <p>Hãy thử thay đổi bộ lọc hoặc từ khóa.</p>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <!-- PRODUCT -->
+                            <td>
+                                <div class="product-info">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@Url.Content("~/products/" + item.ImageUrl)"
+                                             alt="@item.ProductName"
+                                             class="product-thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <div class="product-placeholder">
+                                            <i class="bi bi-box-seam"></i>
+                                        </div>
+                                    }
+
+                                    <div>
+                                        <div class="product-name">
+                                            @item.ProductName
+                                        </div>
+
+                                        <div class="product-id">
+                                            Mã SP: #@item.ProductId
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- CATEGORY -->
+                            <td>
+                                <span class="category-badge">
+                                    @(item.Category?.CategoryName ?? "Chưa phân loại")
+                                </span>
+                            </td>
+
+                            <!-- PRICE -->
+                            <td>
+                                <span class="product-price">
+                                    @item.Price.ToString("N0") đ
+                                </span>
+                            </td>
+
+                            <!-- STOCK -->
+                            <td>
+                                @if (item.StockQuantity > 10)
+                                {
+                                    <span class="stock-badge in-stock">
+                                        <span class="stock-dot"></span>
+                                        @item.StockQuantity còn
+                                    </span>
+                                }
+                                else if (item.StockQuantity > 0)
+                                {
+                                    <span class="stock-badge low-stock">
+                                        <span class="stock-dot"></span>
+                                        Còn @item.StockQuantity
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="stock-badge out-stock">
+                                        <span class="stock-dot"></span>
+                                        Hết hàng
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- ACTIONS -->
+                            <td>
+                                <div class="table-actions">
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.ProductId"
+                                       class="action-btn view-btn"
+                                       title="Chi tiết">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.ProductId"
+                                       class="action-btn edit-btn"
+                                       title="Sửa">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.ProductId"
+                                       class="action-btn delete-btn"
+                                       title="Xóa">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-footer">
+
+        <div class="pagination-info">
+            Hiển thị
+            <strong>@startItem–@endItem</strong>
+            trong <strong>@totalItems</strong> sản phẩm
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Phân trang sản phẩm">
+                <ul class="pagination mb-0">
+
+                    <!-- PREVIOUS -->
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage - 1)"
+                           asp-route-searchString="@searchString"
+                           asp-route-categoryId="@categoryId"
+                           asp-route-minPrice="@minPrice"
+                           asp-route-maxPrice="@maxPrice"
+                           aria-label="Trang trước">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    <!-- PAGE NUMBERS -->
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-searchString="@searchString"
+                               asp-route-categoryId="@categoryId"
+                               asp-route-minPrice="@minPrice"
+                               asp-route-maxPrice="@maxPrice">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    <!-- NEXT -->
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage + 1)"
+                           asp-route-searchString="@searchString"
+                           asp-route-categoryId="@categoryId"
+                           asp-route-minPrice="@minPrice"
+                           asp-route-maxPrice="@maxPrice"
+                           aria-label="Trang sau">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+        }
+    </div>
+</div>

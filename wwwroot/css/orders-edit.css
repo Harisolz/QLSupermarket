@@ -1,0 +1,243 @@
+﻿
+/* ======================================
+   ORDERS EDIT - QLSUPERMARKET
+====================================== */
+
+.order-edit-page {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 30px;
+    color: #172b4d;
+}
+
+/* HEADER */
+
+.edit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.page-eyebrow {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+}
+
+.edit-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.edit-header p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+    .btn-back:hover {
+        background: #f1f5f9;
+        color: #2563eb;
+    }
+
+/* CARD */
+
+.edit-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 5px 22px rgba(15,23,42,.04);
+}
+
+.edit-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 22px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.header-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    border-radius: 12px;
+    color: #2563eb;
+    font-size: 21px;
+}
+
+.edit-card-header h5 {
+    font-size: 18px;
+    font-weight: 750;
+    color: #0f172a;
+    margin-bottom: 5px;
+}
+
+.edit-card-header p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* FORM */
+
+.order-edit-page .form-label {
+    font-size: 14px;
+    font-weight: 650;
+    color: #334155;
+    margin-bottom: 9px;
+}
+
+    .order-edit-page .form-label i {
+        color: #64748b;
+        margin-right: 6px;
+    }
+
+.required {
+    color: #ef4444;
+}
+
+.order-edit-page .form-control,
+.order-edit-page .form-select {
+    min-height: 46px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+}
+
+    .order-edit-page .form-control:focus,
+    .order-edit-page .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+    }
+
+    .order-edit-page .form-control[readonly] {
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+.order-edit-page textarea.form-control {
+    min-height: 110px;
+}
+
+.order-edit-page .input-group-text {
+    background: #f8fafc;
+    border-color: #dbe3ef;
+    border-radius: 0 10px 10px 0;
+    color: #64748b;
+}
+
+.form-hint {
+    display: block;
+    color: #94a3b8;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+/* ACTIONS */
+
+.edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 28px;
+}
+
+.btn-cancel,
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px 24px;
+    min-height: 45px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn-cancel {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+}
+
+    .btn-cancel:hover {
+        background: #f1f5f9;
+    }
+
+.btn-save {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+    .btn-save:hover {
+        background: #1d4ed8;
+    }
+
+.order-edit-page .text-danger {
+    font-size: 12px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+    .order-edit-page {
+        padding: 18px 12px;
+    }
+
+    .edit-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+        .edit-header h2 {
+            font-size: 24px;
+        }
+
+    .edit-card {
+        padding: 20px;
+    }
+
+    .edit-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel,
+    .btn-save {
+        width: 100%;
+    }
+}

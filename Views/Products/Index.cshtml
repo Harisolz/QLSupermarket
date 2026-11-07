@@ -1,0 +1,225 @@
+
+@model IEnumerable<QLSupermarket.Models.Product>
+@using QLSupermarket.Models
+
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+
+    var categories = ViewBag.Categories as List<Category>
+                     ?? new List<Category>();
+
+    string searchString = ViewBag.SearchString as string ?? "";
+    int? categoryId = ViewBag.CategoryId;
+    decimal? minPrice = ViewBag.MinPrice;
+    decimal? maxPrice = ViewBag.MaxPrice;
+}
+
+<link rel="stylesheet"
+      href="~/css/products-index.css"
+      asp-append-version="true" />
+
+<div class="products-page">
+
+    <!-- HEADER -->
+    <div class="products-header">
+        <div>
+            <div class="products-eyebrow">
+                QUẢN LÝ KHO HÀNG
+            </div>
+
+            <h2>Quản lý sản phẩm</h2>
+
+            <p>
+                Theo dõi, tìm kiếm và quản lý hàng hóa trong siêu thị.
+            </p>
+        </div>
+
+        <a asp-controller="Products"
+           asp-action="Create"
+           class="btn-add-product">
+            <i class="bi bi-plus-lg"></i>
+            Thêm sản phẩm
+        </a>
+    </div>
+
+    <!-- THÔNG BÁO THÀNH CÔNG -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    <!-- THÔNG BÁO LỖI -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng"></button>
+        </div>
+    }
+
+    <!-- FILTER -->
+    <div class="products-card filter-card">
+
+        <div class="section-heading">
+            <div class="section-icon">
+                <i class="bi bi-sliders"></i>
+            </div>
+
+            <div>
+                <h5>Bộ lọc sản phẩm</h5>
+                <p>
+                    Tìm kiếm nhanh theo tên, danh mục và giá bán
+                </p>
+            </div>
+        </div>
+
+        <!-- AJAX FILTER FORM -->
+        <form id="productFilterForm"
+              asp-controller="Products"
+              asp-action="Index"
+              method="get">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+
+                <!-- TÌM KIẾM -->
+                <div class="col-12">
+                    <label for="searchString"
+                           class="form-label">
+                        Tìm kiếm sản phẩm
+                    </label>
+
+                    <div class="search-field">
+                        <i class="bi bi-search"></i>
+
+                        <input type="text"
+                               id="searchString"
+                               name="searchString"
+                               value="@searchString"
+                               placeholder="Nhập tên sản phẩm cần tìm..."
+                               autocomplete="off" />
+                    </div>
+                </div>
+
+                <!-- DANH MỤC -->
+                <div class="col-lg-4 col-md-6">
+                    <label for="categoryId"
+                           class="form-label">
+                        Danh mục
+                    </label>
+
+                    <select id="categoryId"
+                            name="categoryId"
+                            class="form-select">
+
+                        <option value="">
+                            Tất cả danh mục
+                        </option>
+
+                        @foreach (var category in categories)
+                        {
+                            if (categoryId == category.CategoryId)
+                            {
+                                <option value="@category.CategoryId"
+                                        selected>
+                                    @category.CategoryName
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@category.CategoryId">
+                                    @category.CategoryName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- GIÁ TỐI THIỂU -->
+                <div class="col-lg-4 col-md-6">
+                    <label for="minPrice"
+                           class="form-label">
+                        Giá từ (VNĐ)
+                    </label>
+
+                    <input type="number"
+                           id="minPrice"
+                           name="minPrice"
+                           value="@minPrice"
+                           min="0"
+                           step="1000"
+                           class="form-control"
+                           placeholder="Ví dụ: 10000" />
+                </div>
+
+                <!-- GIÁ TỐI ĐA -->
+                <div class="col-lg-4 col-md-6">
+                    <label for="maxPrice"
+                           class="form-label">
+                        Giá đến (VNĐ)
+                    </label>
+
+                    <input type="number"
+                           id="maxPrice"
+                           name="maxPrice"
+                           value="@maxPrice"
+                           min="0"
+                           step="1000"
+                           class="form-control"
+                           placeholder="Không giới hạn" />
+                </div>
+
+            </div>
+
+            <!-- FILTER ACTIONS -->
+            <div class="filter-actions">
+
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="btn-reset">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Đặt lại
+                </a>
+
+                <button type="submit"
+                        class="btn-apply">
+                    <i class="bi bi-funnel"></i>
+                    Áp dụng bộ lọc
+                </button>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- PRODUCT LIST - AJAX -->
+    <div id="product-list"
+         aria-live="polite"
+         aria-busy="false">
+
+        <partial name="_ProductTable" model="Model" />
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/products-index.js"
+            asp-append-version="true"></script>
+}

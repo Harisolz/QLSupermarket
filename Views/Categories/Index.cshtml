@@ -1,0 +1,196 @@
+@model IEnumerable<QLSupermarket.Models.Category>
+
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    var categories = Model.ToList();
+}
+
+<link rel="stylesheet"
+      href="~/css/categories-index.css"
+      asp-append-version="true" />
+
+<div class="categories-page">
+
+    <!-- HEADER -->
+    <div class="categories-header">
+        <div>
+            <div class="categories-eyebrow">
+                QUẢN LÝ KHO HÀNG
+            </div>
+
+            <h2>Danh mục sản phẩm</h2>
+            <p>Quản lý và phân loại hàng hóa trong siêu thị.</p>
+        </div>
+
+        <a asp-action="Create" class="btn-add-category">
+            <i class="bi bi-plus-lg"></i>
+            Thêm danh mục
+        </a>
+    </div>
+
+    <!-- CATEGORY LIST -->
+    <div class="categories-card">
+
+        <div class="categories-card-header">
+            <div>
+                <h5>Danh sách danh mục</h5>
+                <p>Theo dõi các nhóm hàng hóa hiện có</p>
+            </div>
+
+            <span class="categories-count">
+                @categories.Count danh mục
+            </span>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="categories-toolbar">
+            <div class="categories-search">
+                <i class="bi bi-search"></i>
+
+                <input type="search"
+                       id="categorySearch"
+                       placeholder="Tìm theo tên hoặc mô tả danh mục..."
+                       autocomplete="off" />
+            </div>
+
+            <span class="categories-search-info"
+                  id="categoryResultCount">
+                Hiển thị @categories.Count danh mục
+            </span>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table categories-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>DANH MỤC</th>
+                        <th>MÔ TẢ</th>
+                        <th>SỐ SẢN PHẨM</th>
+                        <th class="text-end">THAO TÁC</th>
+                    </tr>
+                </thead>
+
+                <tbody id="categoryTableBody">
+                    @foreach (var item in categories)
+                    {
+                        <tr class="category-row"
+                            data-search="@($"{item.CategoryName} {item.Description}".ToLowerInvariant())">
+
+                            <td>
+                                <div class="category-name-cell">
+                                    <div class="category-icon">
+                                        <i class="bi bi-grid"></i>
+                                    </div>
+
+                                    <div>
+                                        <div class="category-name">
+                                            @item.CategoryName
+                                        </div>
+                                        <div class="category-id">
+                                            Mã danh mục: #@item.CategoryId
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="category-description">
+                                    @(string.IsNullOrWhiteSpace(item.Description)
+                                        ? "Chưa có mô tả"
+                                        : item.Description)
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="category-product-count">
+                                    <i class="bi bi-box-seam"></i>
+                                    @item.Products.Count sản phẩm
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="category-actions">
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.CategoryId"
+                                       class="category-action-btn view-action"
+                                       title="Chi tiết"
+                                       aria-label="Chi tiết @item.CategoryName">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.CategoryId"
+                                       class="category-action-btn edit-action"
+                                       title="Sửa"
+                                       aria-label="Sửa @item.CategoryName">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.CategoryId"
+                                       class="category-action-btn delete-action"
+                                       title="Xóa"
+                                       aria-label="Xóa @item.CategoryName">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    <tr id="categoryEmptyRow"
+                        style="display:none;">
+                        <td colspan="4" class="category-empty">
+                            <i class="bi bi-search"></i>
+                            <h6>Không tìm thấy danh mục</h6>
+                            <p>Hãy thử tìm kiếm với từ khóa khác.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="categories-footer">
+            <span>
+                Tổng cộng <strong>@categories.Count</strong> danh mục
+            </span>
+            <span>QLSupermarket · Quản lý danh mục</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("categorySearch");
+            const rows = document.querySelectorAll(".category-row");
+            const resultCount = document.getElementById("categoryResultCount");
+            const emptyRow = document.getElementById("categoryEmptyRow");
+
+            searchInput.addEventListener("input", function () {
+                const keyword = this.value.trim().toLocaleLowerCase("vi-VN");
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const text = row.dataset.search || "";
+                    const matched = text.includes(keyword);
+
+                    row.style.display = matched ? "" : "none";
+
+                    if (matched) visibleCount++;
+                });
+
+                resultCount.textContent =
+                    `Hiển thị ${visibleCount} danh mục`;
+
+                emptyRow.style.display =
+                    visibleCount === 0 ? "" : "none";
+            });
+
+            if (rows.length === 0) {
+                emptyRow.style.display = "";
+            }
+        });
+    </script>
+}

@@ -1,0 +1,213 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+
+    int totalProducts = ViewBag.TotalProducts ?? 0;
+    int totalCategories = ViewBag.TotalCategories ?? 0;
+    int totalOrders = ViewBag.TotalOrders ?? 0;
+    int totalUsers = ViewBag.TotalUsers ?? 0;
+}
+
+<link rel="stylesheet"
+      href="~/css/dashboard.css"
+      asp-append-version="true" />
+
+<div class="dashboard-page">
+
+    <!-- WELCOME -->
+    <div class="dashboard-welcome">
+        <div>
+            <span class="welcome-label">
+                <i class="bi bi-stars"></i>
+                QUẢN LÝ SIÊU THỊ
+            </span>
+
+            <h2>Chào mừng đến với QLSupermarket!</h2>
+
+            <p>
+                Theo dõi hoạt động kinh doanh và quản lý
+                hệ thống siêu thị của bạn tại một nơi.
+            </p>
+        </div>
+
+        <div class="welcome-icon">
+            <i class="bi bi-basket2-fill"></i>
+        </div>
+    </div>
+
+    <!-- SECTION HEADER -->
+    <div class="dashboard-section-heading">
+        <div>
+            <h4>Thống kê tổng quan</h4>
+            <p>Dữ liệu hiện tại của hệ thống</p>
+        </div>
+
+        <span class="dashboard-date">
+            <i class="bi bi-calendar3"></i>
+            @DateTime.Now.ToString("dd/MM/yyyy")
+        </span>
+    </div>
+
+    <!-- STATISTICS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-stat">
+                <div class="stat-top">
+                    <span class="stat-icon stat-blue">
+                        <i class="bi bi-box-seam"></i>
+                    </span>
+                    <span class="stat-type">Sản phẩm</span>
+                </div>
+
+                <p>Tổng sản phẩm</p>
+                <h3>@totalProducts</h3>
+
+                <a asp-controller="Products"
+                   asp-action="Index">
+                    Xem danh sách
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-stat">
+                <div class="stat-top">
+                    <span class="stat-icon stat-purple">
+                        <i class="bi bi-tags"></i>
+                    </span>
+                    <span class="stat-type">Danh mục</span>
+                </div>
+
+                <p>Tổng danh mục</p>
+                <h3>@totalCategories</h3>
+
+                <a asp-controller="Categories"
+                   asp-action="Index">
+                    Xem danh sách
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-stat">
+                <div class="stat-top">
+                    <span class="stat-icon stat-orange">
+                        <i class="bi bi-cart-check"></i>
+                    </span>
+                    <span class="stat-type">Đơn hàng</span>
+                </div>
+
+                <p>Tổng đơn hàng</p>
+                <h3>@totalOrders</h3>
+
+                <a asp-controller="Orders"
+                   asp-action="Index">
+                    Xem danh sách
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-stat">
+                <div class="stat-top">
+                    <span class="stat-icon stat-green">
+                        <i class="bi bi-people"></i>
+                    </span>
+                    <span class="stat-type">Tài khoản</span>
+                </div>
+
+                <p>Người dùng hệ thống</p>
+                <h3>@totalUsers</h3>
+
+                <a asp-controller="Users"
+                   asp-action="Index">
+                    Xem danh sách
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MANAGEMENT -->
+    <div class="dashboard-section-heading">
+        <div>
+            <h4>Quản lý nhanh</h4>
+            <p>Truy cập các chức năng thường sử dụng</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-4 col-md-6">
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="management-card">
+
+                <span class="management-icon stat-blue">
+                    <i class="bi bi-box-seam"></i>
+                </span>
+
+                <h5>Quản lý sản phẩm</h5>
+                <p>
+                    Xem, thêm, chỉnh sửa và quản lý
+                    sản phẩm trong siêu thị.
+                </p>
+
+                <span class="management-link">
+                    Truy cập
+                    <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <a asp-controller="Categories"
+               asp-action="Index"
+               class="management-card">
+
+                <span class="management-icon stat-purple">
+                    <i class="bi bi-tags"></i>
+                </span>
+
+                <h5>Quản lý danh mục</h5>
+                <p>
+                    Phân loại sản phẩm và quản lý
+                    các nhóm hàng hóa.
+                </p>
+
+                <span class="management-link">
+                    Truy cập
+                    <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <a asp-controller="Orders"
+               asp-action="Index"
+               class="management-card">
+
+                <span class="management-icon stat-orange">
+                    <i class="bi bi-receipt"></i>
+                </span>
+
+                <h5>Quản lý đơn hàng</h5>
+                <p>
+                    Theo dõi đơn hàng và xử lý
+                    các giao dịch trong hệ thống.
+                </p>
+
+                <span class="management-link">
+                    Truy cập
+                    <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,220 @@
+@model QLSupermarket.Models.Order
+
+@{
+    ViewData["Title"] = "Chỉnh sửa đơn hàng";
+}
+
+<link rel="stylesheet"
+      href="~/css/orders-edit.css"
+      asp-append-version="true" />
+
+<div class="order-edit-page">
+
+    <!-- HEADER -->
+    <div class="edit-header">
+        <div>
+            <div class="page-eyebrow">
+                QUẢN LÝ BÁN HÀNG
+            </div>
+
+            <h2>Chỉnh sửa đơn hàng #@Model.OrderId</h2>
+
+            <p>
+                Cập nhật thông tin khách hàng,
+                địa chỉ giao hàng và trạng thái đơn hàng.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn-back">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <form asp-controller="Orders"
+          asp-action="Edit"
+          asp-route-orderid="@Model.OrderId"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="OrderId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <div class="edit-card">
+
+            <div class="edit-card-header">
+                <div class="header-icon">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+
+                <div>
+                    <h5>Thông tin đơn hàng</h5>
+                    <p>
+                        Chỉnh sửa các trường thông tin bên dưới.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- MÃ ĐƠN HÀNG -->
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="bi bi-hash"></i>
+                        Mã đơn hàng
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="#@Model.OrderId"
+                           readonly />
+                </div>
+
+                <!-- KHÁCH HÀNG -->
+                <div class="col-md-6">
+                    <label asp-for="UserId"
+                           class="form-label">
+                        <i class="bi bi-person"></i>
+                        Mã khách hàng
+                        <span class="required">*</span>
+                    </label>
+
+                    <input asp-for="UserId"
+                           type="number"
+                           min="1"
+                           class="form-control"
+                           required />
+
+                    <span asp-validation-for="UserId"
+                          class="text-danger"></span>
+                </div>
+
+                <!-- NGÀY ĐẶT -->
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="bi bi-calendar3"></i>
+                        Ngày đặt hàng
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="@(Model.OrderDate?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")"
+                           readonly />
+
+                    <small class="form-hint">
+                        Ngày đặt hàng không được chỉnh sửa.
+                    </small>
+                </div>
+
+                <!-- TỔNG TIỀN -->
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="bi bi-cash-stack"></i>
+                        Tổng tiền
+                    </label>
+
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               value="@Model.TotalAmount.ToString("N0")"
+                               readonly />
+
+                        <span class="input-group-text">VNĐ</span>
+                    </div>
+
+                    <small class="form-hint">
+                        Tổng tiền được tính từ các sản phẩm
+                        trong đơn hàng.
+                    </small>
+                </div>
+
+                <!-- TRẠNG THÁI -->
+                <div class="col-md-6">
+                    <label asp-for="Status"
+                           class="form-label">
+                        <i class="bi bi-truck"></i>
+                        Trạng thái đơn hàng
+                        <span class="required">*</span>
+                    </label>
+
+                    <select asp-for="Status"
+                            class="form-select"
+                            required>
+                        <option value="">
+                            -- Chọn trạng thái --
+                        </option>
+
+                        <option value="Pending">
+                            Chờ xử lý
+                        </option>
+
+                        <option value="Processing">
+                            Đang chuẩn bị
+                        </option>
+
+                        <option value="Shipping">
+                            Đang giao hàng
+                        </option>
+
+                        <option value="Delivered">
+                            Đã giao hàng
+                        </option>
+                    </select>
+
+                    <span asp-validation-for="Status"
+                          class="text-danger"></span>
+
+                    <small class="form-hint">
+                        Trạng thái đã hủy được xử lý
+                        bằng chức năng hủy đơn riêng.
+                    </small>
+                </div>
+
+                <!-- ĐỊA CHỈ -->
+                <div class="col-12">
+                    <label asp-for="ShippingAddress"
+                           class="form-label">
+                        <i class="bi bi-geo-alt"></i>
+                        Địa chỉ giao hàng
+                        <span class="required">*</span>
+                    </label>
+
+                    <textarea asp-for="ShippingAddress"
+                              class="form-control"
+                              rows="4"
+                              required
+                              placeholder="Nhập địa chỉ giao hàng..."></textarea>
+
+                    <span asp-validation-for="ShippingAddress"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="edit-actions">
+            <a asp-action="Index"
+               class="btn-cancel">
+                <i class="bi bi-x-lg"></i>
+                Hủy
+            </a>
+
+            <button type="submit"
+                    class="btn-save">
+                <i class="bi bi-check2-circle"></i>
+                Lưu thay đổi
+            </button>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

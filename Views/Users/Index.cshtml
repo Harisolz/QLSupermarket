@@ -1,0 +1,32 @@
+@model IEnumerable<QLSupermarket.Models.User>
+
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="container mt-4">
+    <h2>Danh sách người dùng hệ thống</h2>
+
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Tên đăng nhập</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Địa chỉ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+                <tr>
+                    <td>@item.Username</td>
+                    <td>@item.FullName</td>
+                    <td>@item.Email</td>
+                    <td>@item.Phone</td>
+                    <td>@item.Address</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

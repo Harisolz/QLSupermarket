@@ -1,0 +1,373 @@
+
+@model QLSupermarket.Models.Order
+@using QLSupermarket.Models
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Thêm đơn hàng";
+
+    var products = ViewBag.Products as List<Product>
+                   ?? new List<Product>();
+
+    var users = ViewBag.Users as List<User>
+                ?? new List<User>();
+
+    var details = Model?.OrderDetails?.ToList()
+                  ?? new List<OrderDetail>();
+
+    if (!details.Any())
+    {
+        details.Add(new OrderDetail { Quantity = 1 });
+    }
+
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<link rel="stylesheet"
+      href="~/css/orders-create.css"
+      asp-append-version="true" />
+
+<div class="order-create-page">
+
+    <!-- HEADER -->
+    <div class="create-header">
+        <div>
+            <div class="page-eyebrow">
+                QUẢN LÝ BÁN HÀNG
+            </div>
+
+            <h2>Thêm đơn hàng mới</h2>
+
+            <p>
+                Nhập thông tin khách hàng và chọn
+                các sản phẩm cần đặt.
+            </p>
+        </div>
+
+        <a asp-controller="Orders"
+           asp-action="Index"
+           class="btn-back">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <form asp-controller="Orders"
+          asp-action="Create"
+          method="post"
+          id="createOrderForm">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <!-- THÔNG TIN ĐƠN HÀNG -->
+        <div class="create-card">
+
+            <div class="create-card-header">
+                <div class="header-icon">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div>
+                    <h5>Thông tin đơn hàng</h5>
+                    <p>
+                        Nhập thông tin khách hàng
+                        và địa chỉ giao hàng.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- KHÁCH HÀNG -->
+                <div class="col-md-6">
+                    <label asp-for="UserId"
+                           class="form-label">
+                        <i class="bi bi-person"></i>
+                        Khách hàng
+                        <span class="required">*</span>
+                    </label>
+
+                    <select asp-for="UserId"
+                            class="form-select"
+                            required>
+                        <option value="">
+                            -- Chọn khách hàng --
+                        </option>
+
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.UserId">
+                                Khách hàng #@user.UserId
+                            </option>
+                        }
+                    </select>
+
+                    <span asp-validation-for="UserId"
+                          class="text-danger"></span>
+                </div>
+
+                <!-- NGÀY TẠO -->
+                <div class="col-md-6">
+                    <label class="form-label">
+                        <i class="bi bi-calendar3"></i>
+                        Ngày giờ tạo
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="Tự động khi lưu đơn hàng"
+                           readonly />
+
+                    <small class="form-hint">
+                        Hệ thống sẽ tự ghi nhận
+                        ngày giờ tạo đơn.
+                    </small>
+                </div>
+
+                <!-- ĐỊA CHỈ -->
+                <div class="col-12">
+                    <label asp-for="ShippingAddress"
+                           class="form-label">
+                        <i class="bi bi-geo-alt"></i>
+                        Địa chỉ giao hàng
+                        <span class="required">*</span>
+                    </label>
+
+                    <textarea asp-for="ShippingAddress"
+                              class="form-control"
+                              rows="3"
+                              required
+                              placeholder="Nhập địa chỉ giao hàng..."></textarea>
+
+                    <span asp-validation-for="ShippingAddress"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DANH SÁCH SẢN PHẨM -->
+        <div class="create-card mt-4">
+
+            <div class="create-card-header product-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="header-icon">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+
+                    <div>
+                        <h5>Chi tiết đơn hàng</h5>
+                        <p>
+                            Chọn sản phẩm và số lượng cần mua.
+                        </p>
+                    </div>
+                </div>
+
+                <button type="button"
+                        id="addProductBtn"
+                        class="btn-add-product">
+                    <i class="bi bi-plus-lg"></i>
+                    Thêm sản phẩm
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table order-products-table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productRows">
+
+                        @for (int i = 0; i < details.Count; i++)
+                        {
+                            var detail = details[i];
+
+                            <tr class="product-row">
+                                <td>
+                                    <select name="OrderDetails[@i].ProductId"
+                                            class="form-select product-select"
+                                            required>
+                                        <option value="">
+                                            -- Chọn sản phẩm --
+                                        </option>
+
+                                        @foreach (var product in products)
+                                        {
+                                            if (detail.ProductId == product.ProductId)
+                                            {
+                                                <option value="@product.ProductId"
+                                                        data-price="@product.Price.ToString(CultureInfo.InvariantCulture)"
+                                                        data-stock="@product.StockQuantity"
+                                                        selected>
+                                                    @product.ProductName
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@product.ProductId"
+                                                        data-price="@product.Price.ToString(CultureInfo.InvariantCulture)"
+                                                        data-stock="@product.StockQuantity">
+                                                    @product.ProductName
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <span class="unit-price">
+                                        0 ₫
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <input type="number"
+                                           name="OrderDetails[@i].Quantity"
+                                           class="form-control quantity-input"
+                                           min="1"
+                                           step="1"
+                                           value="@detail.Quantity"
+                                           required />
+                                </td>
+
+                                <td>
+                                    <strong class="line-total">
+                                        0 ₫
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    <button type="button"
+                                            class="btn-remove-product"
+                                            title="Xóa sản phẩm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="stockWarning"
+                 class="text-danger small mt-2"
+                 role="alert"></div>
+
+            <!-- TỔNG TIỀN -->
+            <div class="order-summary">
+                <div>
+                    <span class="summary-label">
+                        Tổng số lượng
+                    </span>
+
+                    <strong id="totalQuantity">
+                        0
+                    </strong>
+                </div>
+
+                <div>
+                    <span class="summary-label">
+                        Tổng thanh toán
+                    </span>
+
+                    <strong id="grandTotal">
+                        0 ₫
+                    </strong>
+                </div>
+            </div>
+
+            <p class="form-hint mt-3">
+                <i class="bi bi-info-circle"></i>
+                Tổng tiền hiển thị chỉ để tham khảo.
+                Khi lưu, hệ thống sẽ tính lại
+                theo giá sản phẩm trong database.
+            </p>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="create-actions">
+            <a asp-controller="Orders"
+               asp-action="Index"
+               class="btn-cancel">
+                <i class="bi bi-x-lg"></i>
+                Hủy
+            </a>
+
+            <button type="submit"
+                    id="saveOrderBtn"
+                    class="btn-save">
+                <i class="bi bi-check2-circle"></i>
+                Lưu đơn hàng
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- TEMPLATE DÒNG SẢN PHẨM -->
+<template id="productRowTemplate">
+    <tr class="product-row">
+        <td>
+            <select class="form-select product-select"
+                    required>
+                <option value="">
+                    -- Chọn sản phẩm --
+                </option>
+
+                @foreach (var product in products)
+                {
+                    <option value="@product.ProductId"
+                            data-price="@product.Price.ToString(CultureInfo.InvariantCulture)"
+                            data-stock="@product.StockQuantity">
+                        @product.ProductName
+                    </option>
+                }
+            </select>
+        </td>
+
+        <td>
+            <span class="unit-price">0 ₫</span>
+        </td>
+
+        <td>
+            <input type="number"
+                   class="form-control quantity-input"
+                   min="1"
+                   step="1"
+                   value="1"
+                   required />
+        </td>
+
+        <td>
+            <strong class="line-total">0 ₫</strong>
+        </td>
+
+        <td>
+            <button type="button"
+                    class="btn-remove-product"
+                    title="Xóa sản phẩm">
+                <i class="bi bi-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/orders-create.js"
+            asp-append-version="true"></script>
+}

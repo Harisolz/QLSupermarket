@@ -1,0 +1,461 @@
+@model IEnumerable<QLSupermarket.Models.OrderDetail>
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+
+    var details = Model.ToList();
+
+    int totalDetails = details.Count;
+
+    int totalQuantity = details.Sum(x => x.Quantity);
+
+    decimal totalValue = details.Sum(x =>
+        Convert.ToDecimal(x.Quantity) *
+        Convert.ToDecimal(x.UnitPrice));
+}
+
+<link rel="stylesheet"
+      href="~/css/orderdetails-index.css"
+      asp-append-version="true" />
+
+<div class="orderdetails-page">
+
+    <!-- HEADER -->
+    <div class="orderdetails-header">
+        <div>
+            <div class="page-eyebrow">
+                QUẢN LÝ BÁN HÀNG
+            </div>
+
+            <h2>Chi tiết đơn hàng</h2>
+
+            <p>
+                Theo dõi sản phẩm, số lượng và giá trị
+                của từng đơn hàng.
+            </p>
+        </div>
+
+        <a asp-action="Create"
+           class="btn-add-detail">
+            <i class="bi bi-plus-lg"></i>
+            Thêm chi tiết
+        </a>
+    </div>
+
+    <!-- THÔNG BÁO THÀNH CÔNG -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng">
+            </button>
+        </div>
+    }
+
+    <!-- THÔNG BÁO LỖI -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Đóng">
+            </button>
+        </div>
+    }
+
+    <!-- THỐNG KÊ -->
+    <div class="row g-3 mb-4">
+
+        <!-- TỔNG CHI TIẾT -->
+        <div class="col-lg-4 col-md-6">
+            <div class="detail-stat-card">
+
+                <div class="stat-icon blue">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div class="stat-content">
+                    <span>Tổng dòng chi tiết</span>
+                    <h3>@totalDetails</h3>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TỔNG SỐ LƯỢNG -->
+        <div class="col-lg-4 col-md-6">
+            <div class="detail-stat-card">
+
+                <div class="stat-icon orange">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div class="stat-content">
+                    <span>Tổng số lượng sản phẩm</span>
+                    <h3>@totalQuantity</h3>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TỔNG GIÁ TRỊ -->
+        <div class="col-lg-4 col-md-6">
+            <div class="detail-stat-card">
+
+                <div class="stat-icon green">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+
+                <div class="stat-content">
+                    <span>Tổng giá trị chi tiết</span>
+
+                    <h3>
+                        @totalValue.ToString("N0") đ
+                    </h3>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DANH SÁCH CHI TIẾT -->
+    <div class="details-card">
+
+        <!-- HEADER DANH SÁCH -->
+        <div class="details-card-header">
+
+            <div>
+                <h5>Danh sách chi tiết đơn hàng</h5>
+
+                <p>
+                    Quản lý các sản phẩm trong đơn hàng
+                </p>
+            </div>
+
+            <span class="total-badge">
+                @totalDetails chi tiết
+            </span>
+
+        </div>
+
+        <!-- TÌM KIẾM -->
+        <div class="details-toolbar">
+
+            <div class="detail-search">
+
+                <i class="bi bi-search"></i>
+
+                <input type="text"
+                       id="detailSearch"
+                       placeholder="Tìm mã đơn hàng, mã sản phẩm, tên sản phẩm..."
+                       autocomplete="off" />
+
+            </div>
+
+            <span class="result-count"
+                  id="resultCount">
+                @totalDetails kết quả
+            </span>
+
+        </div>
+
+        <!-- BẢNG CHI TIẾT -->
+        <div class="table-responsive">
+
+            <table class="table details-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>MÃ CHI TIẾT</th>
+                        <th>ĐƠN HÀNG</th>
+                        <th>SẢN PHẨM</th>
+                        <th>SỐ LƯỢNG</th>
+                        <th>ĐƠN GIÁ</th>
+                        <th>THÀNH TIỀN</th>
+                        <th class="text-end">THAO TÁC</th>
+                    </tr>
+                </thead>
+
+                <tbody id="detailsTableBody">
+
+                    @if (!details.Any())
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="empty-state">
+
+                                <i class="bi bi-inbox"></i>
+
+                                <h6>
+                                    Chưa có chi tiết đơn hàng
+                                </h6>
+
+                                <p>
+                                    Nhấn "Thêm chi tiết" để bắt đầu.
+                                </p>
+
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in details)
+                        {
+                            decimal unitPrice =
+                                Convert.ToDecimal(item.UnitPrice);
+
+                            decimal lineTotal =
+                                Convert.ToDecimal(item.Quantity) * unitPrice;
+
+                            string productName =
+                                item.Product?.ProductName
+                                ?? $"Sản phẩm #{item.ProductId}";
+
+                            string searchText =
+                                $"{item.OrderDetailId} " +
+                                $"{item.OrderId} " +
+                                $"{item.ProductId} " +
+                                productName;
+
+                            <tr class="detail-row"
+                                data-search="@searchText">
+
+                                <!-- MÃ CHI TIẾT -->
+                                <td>
+                                    <span class="detail-id">
+                                        #@item.OrderDetailId
+                                    </span>
+                                </td>
+
+                                <!-- ĐƠN HÀNG -->
+                                <td>
+                                    <div class="order-cell">
+
+                                        <span class="order-icon">
+                                            <i class="bi bi-receipt"></i>
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                Đơn hàng #@item.OrderId
+                                            </strong>
+
+                                            <small>
+                                                Mã đơn: @item.OrderId
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <!-- SẢN PHẨM -->
+                                <td>
+                                    <div class="product-cell">
+
+                                        <span class="product-icon">
+                                            <i class="bi bi-box-seam"></i>
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                @productName
+                                            </strong>
+
+                                            <small>
+                                                Mã SP: @item.ProductId
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <!-- SỐ LƯỢNG -->
+                                <td>
+                                    <span class="quantity-badge">
+                                        @item.Quantity
+                                    </span>
+                                </td>
+
+                                <!-- ĐƠN GIÁ -->
+                                <td>
+                                    <span class="unit-price">
+                                        @unitPrice.ToString("N0") đ
+                                    </span>
+                                </td>
+
+                                <!-- THÀNH TIỀN -->
+                                <td>
+                                    <span class="line-total">
+                                        @lineTotal.ToString("N0") đ
+                                    </span>
+                                </td>
+
+                                <!-- THAO TÁC -->
+                                <td>
+                                    <div class="detail-actions">
+
+                                        <!-- XEM -->
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.OrderDetailId"
+                                           class="action-btn view-btn"
+                                           title="Xem chi tiết"
+                                           aria-label="Xem chi tiết @item.OrderDetailId">
+
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <!-- SỬA -->
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.OrderDetailId"
+                                           class="action-btn edit-btn"
+                                           title="Chỉnh sửa"
+                                           aria-label="Sửa chi tiết @item.OrderDetailId">
+
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <!-- XÓA -->
+                                        <a asp-action="Delete"
+                                           asp-route-id="@item.OrderDetailId"
+                                           class="action-btn delete-btn"
+                                           title="Xóa"
+                                           aria-label="Xóa chi tiết @item.OrderDetailId">
+
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                    <!-- KHÔNG CÓ KẾT QUẢ TÌM KIẾM -->
+                    <tr id="noSearchResults"
+                        style="display:none;">
+
+                        <td colspan="7"
+                            class="empty-state">
+
+                            <i class="bi bi-search"></i>
+
+                            <h6>Không tìm thấy kết quả</h6>
+
+                            <p>
+                                Hãy thử từ khóa khác.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="details-footer">
+
+            <span>
+                Hiển thị
+
+                <strong id="visibleCount">
+                    @totalDetails
+                </strong>
+
+                trên tổng số
+
+                <strong>
+                    @totalDetails
+                </strong>
+
+                chi tiết đơn hàng
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput =
+                document.getElementById("detailSearch");
+
+            const rows =
+                document.querySelectorAll(".detail-row");
+
+            const resultCount =
+                document.getElementById("resultCount");
+
+            const visibleCount =
+                document.getElementById("visibleCount");
+
+            const emptyRow =
+                document.getElementById("noSearchResults");
+
+            if (!searchInput) return;
+
+            function filterDetails() {
+
+                const keyword = searchInput.value
+                    .toLocaleLowerCase("vi")
+                    .trim();
+
+                let visible = 0;
+
+                rows.forEach(row => {
+
+                    const text = (row.dataset.search || "")
+                        .toLocaleLowerCase("vi");
+
+                    const match = text.includes(keyword);
+
+                    row.style.display = match ? "" : "none";
+
+                    if (match) {
+                        visible++;
+                    }
+                });
+
+                resultCount.textContent =
+                    visible + " kết quả";
+
+                visibleCount.textContent = visible;
+
+                if (emptyRow) {
+                    emptyRow.style.display =
+                        rows.length > 0 && visible === 0
+                            ? ""
+                            : "none";
+                }
+            }
+
+            searchInput.addEventListener(
+                "input",
+                filterDetails
+            );
+
+        });
+    </script>
+}
